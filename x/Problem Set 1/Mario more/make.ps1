@@ -1,0 +1,1 @@
+clang mario.c -I"${ENV:CS50_LIB}" "${ENV:CS50_LIB}\cs50.c" -Wno-deprecated-declarations -o mario.exe
