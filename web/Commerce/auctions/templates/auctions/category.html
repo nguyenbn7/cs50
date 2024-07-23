@@ -1,0 +1,9 @@
+{% extends "auctions/layout.html" %}
+{% load custom_filters %}
+{% block body %}
+    <h2>Categories</h2>
+    {% for category in categories %}
+        <li><a href="{% url 'index' %}?category={{ category.name }}">{{ category.name }}</a></li>
+    {% endfor %}
+</div>
+{% endblock %}

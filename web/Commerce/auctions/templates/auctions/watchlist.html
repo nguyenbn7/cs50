@@ -1,0 +1,31 @@
+{% extends "auctions/layout.html" %}
+{% load custom_filters %}
+{% block body %}
+<h2>Watchlist: {{ user }}</h2>
+<div class="container">
+    {% for auction in auctions %}        
+        <div class="card h-75 w-75 mx-auto my-2">
+            <div class="row no-gutters">
+                <div class="col-md-4">
+                    <img class="card-img w-75 ml-5" src="{{ auction.photo }}" alt="{{ auction.title }}">
+                </div>
+                <div class="col-md-8">
+                    <div class="card-body text-center">
+                        <input type="text" hidden value="{{ auction.id }}">
+                        <h5 class="card-title">{{ auction.title }}</h5>
+                        <h6 class="card-subtitle mb-2"><b>Price: </b>{{ auction.starting_price | usd }}</h6>
+                        <p class="card-text">{{ auction.description }}</p>
+                        <a href="{% url 'listing' auction.id %}" class="btn btn-primary">Listing</a>
+                        <p class="card-text"><small class="text-muted"> Created {{ auction.created }}</small></p>
+                        {% if not auction.is_active %}
+                            <div class="badge badge-secondary text-wrap" style="width: 6rem;">
+                                Closed
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% endfor %}
+</div>
+{% endblock %}

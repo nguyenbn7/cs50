@@ -1,0 +1,67 @@
+{% extends "network/layout.html" %}
+{% load static %}
+{% block body %}
+    <div class="container shadow-sm p-3 mt-4 bg-light rounded">
+        {% comment %} disable add new post when user click following link {% endcomment %}
+        {% if not following %}
+            <div class="container my-3">
+                {% comment %} if user not sign in then new post button will redirect to login {% endcomment %}
+                <a class="text-secondary" {% if user.is_authenticated %}data-toggle="collapse" role="button"{% endif %} href="{% if user.is_authenticated %}#newpost{% else %}{% url 'login' %}{% endif %}">New Post</a>
+                {% comment %} user can only create new post if he/she signs in {% endcomment %}
+                {% if user.is_authenticated %}
+                    <form action="{% url 'post_new' %}" method="post" class="collapse" id="newpost">
+                        {% csrf_token %}
+                        <div class="form-group">
+                            <textarea class="form-control" id="content" name="content" rows="5"></textarea>
+                        </div>
+                        <input type="submit" value="post" class="btn btn-primary">
+                    </form>
+                {% endif %}
+            </div>
+        {% endif %}
+        {% comment %} Pagination bootstrap {% endcomment %}
+        <nav aria-label="Page navigation">
+            <ul class="pagination justify-content-end">
+                {% if posts.has_previous %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ posts.previous_page_number }}" tabindex="-1" aria-disabled="true">Previous</a>
+                    </li>
+                {% endif %}
+                {% for page in posts_page_range %}
+                    {% ifequal page posts.number %}
+                        <li class="page-item active" aria-current="page">
+                            <a class="page-link" href="?page={{ page }}">{{ page }} <span class="sr-only">(current)</span></a>
+                        </li>
+                    {% else %}
+                        <li class="page-item"><a class="page-link" href="?page={{ page }}">{{ page }}</a></li>
+                    {% endifequal %}
+                {% endfor %}
+                {% if posts.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ posts.next_page_number }}">Next</a>
+                    </li>
+                {% endif %}
+            </ul>
+        </nav>
+        {% comment %} Show all posts {% endcomment %}
+        <div class="container">
+            {% for post in posts %}
+                <div>
+                    <h2><a href="{% url 'profile' post.0.user %}">{{ post.0.user }}</a></h2>
+                    <p>{{ post.0.content }}</p>
+                    {% if user.is_authenticated and post.0.user == user %}
+                        <a href="{% url 'post_edit' post.0.id %}" class="btn btn-link">Edit</a>
+                    {% endif %}
+                    <small class="text-muted">{{ post.0.created_date }}</small>
+                    {% if user.is_authenticated %}
+                        <a href="{% url 'like' post.0.id %}" id="{{ post.0.id }}" class="like-btn"><i class="fa {% if not post.1 %}fa-heart-o{% else %}fa-heart{% endif %}" aria-hidden="true" {% if not post.1 %}style="color: #007bff;"{% else %}style="color: #dc3545;"{% endif %} id="like-{{ post.0.id }}"></i></a>
+                    {% endif %}
+                    <p class="text-secondary" id="{{ post.0.id }}-like-count">Likes: {{ post.2 }}</p>
+                    <p>Comment</p>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+{% comment %} Script for like button {% endcomment %}
+<script src="{% static 'network/index.js' %}"></script>
+{% endblock %}
