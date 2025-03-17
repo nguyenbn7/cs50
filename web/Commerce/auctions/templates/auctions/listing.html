@@ -1,0 +1,123 @@
+{% extends "auctions/layout.html" %} {% load custom_filters %} {% block body %}
+<h2>Listing: {{ auction.title }}</h2>
+{% if user.is_authenticated %}
+<div class="container my-3">
+  {% if not watchlist %}
+  <a href="{% url 'watchlist_add' auction.id %}" class="btn btn-secondary"
+    >Add Watchlist</a
+  >
+  {% else %}
+  <a href="{% url 'watchlist_add' auction.id %}" class="btn btn-danger"
+    >Watchlisted</a
+  >
+  {% endif %}
+</div>
+{% endif %}
+<div class="container">
+  <div class="row">
+    <div class="col-6">
+      <div class="text-center">
+        {% if not auction.is_active %}
+          <p style="font-size: 2rem">Winner is: <b>{{ winner }}</b></p>
+        {% endif %}
+      </div>
+      <div class="text-center">
+        <img
+          src="{{ auction.photo }}"
+          alt="{{ auction.title }}"
+          class="img-fluid  h-75"
+          width="300rem"
+          height="200rem"
+        />
+      </div>
+      <div>
+        <h3>Description</h3>
+        {% if not auction.description %}
+        <p>No description</p>
+        {% else %}
+        <p>{{ auction.description }}</p>
+        {% endif %}
+      </div>
+      <div>
+        <p>
+          Current bid:
+          <span style="font-size: 2em"><b>{{ current_bid | usd }}</b></span>
+        </p>
+      </div>
+      <div class="mt-4 mb-2">
+        <h3>Details</h3>
+        <ul>
+          <li>Created by: <b>{{ auction.listed_by }}</b></li>
+          <li>Starting price: <b>{{ auction.starting_price | usd}}</b></li>
+          <li>Category: <b>{{ auction.category }}</b></li>
+          <li>Created at: <b>{{ auction.created }}</b></li>
+        </ul>
+      </div>
+    </div>
+    <div class="col-4">
+      {% if user.is_authenticated and auction.is_active %} 
+        {% if user != auction.listed_by %}
+        <p>{{ bids_count }} bid(s) so far. 
+          {% if bids_count > current_bidder_count %}
+            {% if current_bidder_count == 0 and current_bidder == request.user %}
+              Your bid is the current bid
+            {% elif current_bidder_count > 0 %}
+              Your bid is left behind by {{ current_bidder_count }} bid(s)
+            {% endif %}
+          {% endif %}
+        </p>
+        <form action="{% url 'bid' auction.id %}" method="post">
+          {% csrf_token %}
+          <div class="form-group">
+            <input
+              type="number"
+              name="bid"
+              id="bid"
+              placeholder="Bid"
+              class="form-control"
+              step=".01"
+              required
+            />
+          </div>
+          <input type="submit" class="btn btn-primary" value="Place Bid" />
+        </form>
+        {% else %}
+        <p>
+          <a href="{% url 'auction_close' auction.id %}" class="btn btn-danger"
+            >Close</a
+          >
+        </p>
+        {% endif %} 
+      {% endif %}
+      <div class="mt-4 mb-2">
+        <h3>Comments</h3>
+        {% if user.is_authenticated %}
+        <form action="{% url 'comment_add' auction.id %}" method="post">
+          {% csrf_token %}
+          <div class="form-group">
+            <textarea
+              name="comment"
+              id="comment"
+              rows="4"
+              class="form-control"
+            ></textarea>
+          </div>
+          <input type="submit" value="Add" class="btn btn-primary" />
+        </form>
+        {% endif %}
+        <ul class="mt-5" style="list-style-type: none">
+          {% for comment in comments %}
+          <li class="mb-2">
+            <div>
+              By <a href="#" class="btn btn-link">{{ comment.user }}</a> on
+              <span>{{ comment.created }}</span>
+            </div>
+            <span>{{ comment.text }}</span>
+          </li>
+          {% endfor %}
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

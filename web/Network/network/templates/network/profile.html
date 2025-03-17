@@ -1,0 +1,58 @@
+{% extends "network/layout.html" %}
+{% load static %}
+{% block body %}
+    <div class="container">
+        <h2>Profile: {{ profile_user.username }}</h2>
+        <p id="follower">Follower: {{ count_people_follow_profile_user }}</p>
+        <p id="following">Following: {{ count_people_profile_user_follows }}</p>
+        {% if not user == profile_user %}
+            <button class="btn {% if not follow %}btn-primary{% else %}btn-danger{% endif %}" id="follow" data-user="{{ profile_user.username }}">{% if not follow %}Follow{% else %}Unfollow{% endif %}</button>
+        {% endif %}
+    </div>
+    <div class="container shadow-sm p-3 mt-4 bg-light rounded">
+        {% comment %} Pagination bootstrap {% endcomment %}
+        <nav aria-label="Page navigation">
+            <ul class="pagination justify-content-end">
+                {% if posts.has_previous %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ posts.previous_page_number }}" tabindex="-1" aria-disabled="true">Previous</a>
+                    </li>
+                {% endif %}
+                {% for page in posts_page_range %}
+                    {% ifequal page posts.number %}
+                        <li class="page-item active" aria-current="page">
+                            <a class="page-link" href="?page={{ page }}">{{ page }} <span class="sr-only">(current)</span></a>
+                        </li>
+                    {% else %}
+                        <li class="page-item"><a class="page-link" href="?page={{ page }}">{{ page }}</a></li>
+                    {% endifequal %}
+                {% endfor %}
+                {% if posts.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ posts.next_page_number }}">Next</a>
+                    </li>
+                {% endif %}
+            </ul>
+        </nav>
+        {% comment %} Show all posts {% endcomment %}
+        <div class="container">
+            {% for post in posts %}
+                <div>
+                    <h2><a href="{% url 'profile' post.0.user %}">{{ post.0.user }}</a></h2>
+                    <p>{{ post.0.content }}</p>
+                    {% if user.is_authenticated and post.0.user == user %}
+                        <a href="{% url 'post_edit' post.0.id %}" class="btn btn-link">Edit</a>
+                    {% endif %}
+                    <small class="text-muted">{{ post.0.created_date }}</small>
+                    {% if user.is_authenticated %}
+                        <a href="{% url 'like' post.0.id %}" id="{{ post.0.id }}" class="like-btn"><i class="fa {% if not post.1 %}fa-heart-o{% else %}fa-heart{% endif %}" aria-hidden="true" {% if not post.1 %}style="color: #007bff;"{% else %}style="color: #dc3545;"{% endif %} id="like-{{ post.0.id }}"></i></a>
+                    {% endif %}
+                    <p class="text-secondary" id="{{ post.0.id }}-like-count">Likes: {{ post.2 }}</p>
+                    <p>Comment</p>
+                </div>
+            {% endfor %}
+        </div>
+        {% csrf_token %}
+    </div>
+<script src="{% static 'network/profile.js' %}"></script>
+{% endblock %}
