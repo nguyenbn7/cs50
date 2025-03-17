@@ -1,0 +1,3 @@
+{
+  "clangd.fallbackFlags": ["-I${workspaceFolder}", "-I${env:CS50_LIB}"]
+}
